@@ -1,9 +1,9 @@
 import streamlit as st
 import menu as menu
-import service.masterService as masterService
+import service.poderesService as poderesService
 from layout import text_center
 
-st.set_page_config(page_title="Mestres - Comunidade Game", page_icon=":material/support_agent:", layout="centered", initial_sidebar_state="collapsed")
+st.set_page_config(page_title="Poderes - Comunidade Game", page_icon=":material/support_agent:", layout="centered", initial_sidebar_state="collapsed")
 
 # . Monta tabela com caixa de seleção
 def dataframe_with_selections(df):
@@ -31,9 +31,9 @@ def mount_table():
 # =========
 
 # Inicializar dataframe
-st.session_state.df_docs = masterService.get_docs()
+st.session_state.df_docs = poderesService.get_docs()
 
-text_center("🧙 Mestres")
+text_center("✨ Poderes")
 menu.back_to_main_menu()
 
 tab1, tab2 = st.tabs(['💠 Todos','💠 Individual'])   

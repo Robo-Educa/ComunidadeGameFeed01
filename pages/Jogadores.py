@@ -33,7 +33,7 @@ def mount_table():
 # Inicializar dataframe
 st.session_state.df_docs = playerService.get_docs()
 
-text_center("👤Jogadores")
+text_center("⭐ Jogadores")
 menu.back_to_main_menu()
 
 tab1, tab2 = st.tabs(['💠 Todos','💠 Individual'])   
