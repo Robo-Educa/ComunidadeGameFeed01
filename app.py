@@ -9,4 +9,4 @@ st.sidebar.title("Comunidade Game")
 main_menu()
 
 # Imagem
-st.image(image="./static/logo.jpg", use_column_width=True)
+st.image(image="./static/logo.jpg", use_container_width=True)
