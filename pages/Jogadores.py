@@ -9,7 +9,7 @@ st.set_page_config(page_title="Jogadores - Comunidade Game", page_icon=":materia
 
 background_path = "./static/background2.jpg" # substitua pelo caminho da sua imagem de background
 avatar_path = "./static/avatar.png" # substitua pelo caminho da sua imagem de avatar com fundo transparente
-
+indice = 1
 
 def montar_imagem_jogador(background_path, avatar_path, nome_jogador, pontos, ranking):
     """Sobrepõe um avatar sobre um background."""
@@ -39,9 +39,6 @@ def montar_imagem_jogador(background_path, avatar_path, nome_jogador, pontos, ra
 
     return background
 
-def avancar():
-    return
-
 def voltar():
     return
 
@@ -64,10 +61,13 @@ with tab1:
         voltar()
 
     if back_col.button("Próximo", use_container_width=True):
-        avancar()
+        voltar()
 
     try:
-        resultado = montar_imagem_jogador(background_path, avatar_path, "Carlos Trenell", "500", "1")
+        jogador_nick_name = ranking["Nick Name"][indice]
+        jogador_pontos = ranking["Total de Pontos"][indice]
+
+        resultado = montar_imagem_jogador(background_path, avatar_path, jogador_nick_name, jogador_pontos, indice)
         st.image(resultado, use_container_width=True)
     except FileNotFoundError:
         st.error("Arquivos de imagem não encontrados.")

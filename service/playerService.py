@@ -130,5 +130,16 @@ def validaUnique(value):
     
     return status, message
 
+def get_doc(field, value):
+    doc = playerRepository.find(field, value)
+    if doc:
+        response = doc
+    else:
+        response = {
+                "status": "error",
+                "message": "Documento não localizado"
+            } 
+
+    return response
 
     
