@@ -1,6 +1,7 @@
 import streamlit as st
 import menu as menu
 import service.playerService as playerService
+import service.playerAtividadesService as playerAtividadesService 
 from layout import text_center
 from PIL import Image, ImageDraw, ImageFont
 
@@ -8,9 +9,6 @@ st.set_page_config(page_title="Jogadores - Comunidade Game", page_icon=":materia
 
 background_path = "./static/background2.jpg" # substitua pelo caminho da sua imagem de background
 avatar_path = "./static/avatar.png" # substitua pelo caminho da sua imagem de avatar com fundo transparente
-
-def buscar_jogador(indice):
-    playerService.get_docs()
 
 
 def montar_imagem_jogador(background_path, avatar_path, nome_jogador, pontos, ranking):
@@ -55,6 +53,7 @@ def voltar():
 st.session_state.df_docs = playerService.get_docs()
 
 text_center("⭐ Jogadores")
+ranking = playerAtividadesService.get_ranking()
 
 tab1, tab2 = st.tabs(['💠 Individual','💠 Todos'])   
 
@@ -72,3 +71,6 @@ with tab1:
         st.image(resultado, use_container_width=True)
     except FileNotFoundError:
         st.error("Arquivos de imagem não encontrados.")
+
+with tab2:
+    st.dataframe(ranking)
