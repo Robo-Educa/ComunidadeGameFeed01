@@ -9,9 +9,8 @@ st.set_page_config(page_title="Jogadores - Comunidade Game", page_icon=":materia
 
 background_path = "./static/background2.jpg" # substitua pelo caminho da sua imagem de background
 avatar_path = "./static/avatar.png" # substitua pelo caminho da sua imagem de avatar com fundo transparente
-indice = 1
 
-def montar_imagem_jogador(background_path, avatar_path, nome_jogador, pontos, ranking):
+def montar_imagem_jogador(background_path, avatar_path, nome_jogador, pontos, ranking, placeholder):
     """Sobrepõe um avatar sobre um background."""
 
     background = Image.open(background_path).convert("RGBA")
@@ -37,17 +36,27 @@ def montar_imagem_jogador(background_path, avatar_path, nome_jogador, pontos, ra
     draw.text(nome_posicao, nome_jogador, font=fonte, fill=(255, 255, 255), anchor="mm")  # Texto branco e centralizado
     draw.text(pontos_posicao, f"{ranking}º Lugar - {pontos} pts", font=fonte, fill=(255, 255, 255), anchor="mm")  # Texto branco e centralizado
 
-    return background
+    # Exibe a imagem
+    placeholder.empty() #Limpa o espaço do placeholder
+    #placeholder.image(background, use_container_width=True) 
+    placeholder.write(st.session_state.indice)
 
-def voltar():
-    return
+def mover(value, placeholder): 
+    indice = int(st.session_state.indice) 
+    indice =  indice + int(value)  
+    # st.session_state.indice = indice
+    placeholder.write(indice)
+    # jogador_nick_name = ranking["Nick Name"][indice]
+    # jogador_pontos = ranking["Total de Pontos"][indice]
+    # montar_imagem_jogador(background_path, avatar_path, jogador_nick_name, jogador_pontos, st.session_state.indice, placeholder)
 
 # =========
 # main
 # =========
 
 # Inicializar dataframe
-st.session_state.df_docs = playerService.get_docs()
+if not 'indice' in st.session_state:
+    st.session_state.indice = 1
 
 text_center("⭐ Jogadores")
 ranking = playerAtividadesService.get_ranking()
@@ -56,19 +65,20 @@ tab1, tab2 = st.tabs(['💠 Individual','💠 Todos'])
 
 with tab1:    
     next_col, back_col=  st.columns(2)
+    placeholder = st.empty() #Cria placeholder.
 
     if next_col.button("Anterior", use_container_width=True):
-        voltar()
+        mover(-1, placeholder)
 
     if back_col.button("Próximo", use_container_width=True):
-        voltar()
+        mover(1, placeholder)
 
-    try:
-        jogador_nick_name = ranking["Nick Name"][indice]
-        jogador_pontos = ranking["Total de Pontos"][indice]
-
-        resultado = montar_imagem_jogador(background_path, avatar_path, jogador_nick_name, jogador_pontos, indice)
-        st.image(resultado, use_container_width=True)
+    try:    
+        # jogador_nick_name = ranking["Nick Name"][st.session_state.indice]
+        # jogador_pontos = ranking["Total de Pontos"][st.session_state.indice]
+        placeholder.write(st.session_state.indice)
+        #montar_imagem_jogador(background_path, avatar_path, jogador_nick_name, jogador_pontos, st.session_state.indice, placeholder)
+        
     except FileNotFoundError:
         st.error("Arquivos de imagem não encontrados.")
 
