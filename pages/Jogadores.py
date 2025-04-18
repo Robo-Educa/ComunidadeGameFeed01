@@ -10,7 +10,7 @@ from io import BytesIO
 
 st.set_page_config(page_title="Jogadores - Comunidade Game", page_icon=":material/support_agent:", layout="wide", initial_sidebar_state="collapsed")
 
-def exibir_imagem_jogador(avatar_url, nome_jogador, pontos, placeholder):
+def exibir_imagem_jogador(avatar_url, nome_jogador, pontos, jogador_posicao, placeholder):
     """Sobrepõe um avatar sobre um background, com barra de progresso enquanto carrega."""
     
     # Cria a barra de progresso
@@ -41,7 +41,7 @@ def exibir_imagem_jogador(avatar_url, nome_jogador, pontos, placeholder):
     fonte = ImageFont.truetype("arial.ttf", 20)
     nome_posicao = (background.width // 2, posicao[1] - 15)
     pontos_posicao = (background.width // 2, posicao[1] + 280 + 15)
-    draw.text(nome_posicao, nome_jogador, font=fonte, fill=(255, 255, 255), anchor="mm")
+    draw.text(nome_posicao, f"{jogador_posicao}º Lugar - {nome_jogador}", font=fonte, fill=(255, 255, 255), anchor="mm")
     draw.text(pontos_posicao, f"{pontos} pts", font=fonte, fill=(255, 255, 255), anchor="mm")
 
     progress_bar.progress(100, text="Imagem pronta!")
@@ -63,8 +63,12 @@ with st.spinner("Carregando Ranking"):
 col1, col2 = st.columns(2)
 
 with col1:
-    jogadores = ranking['Jogador'].tolist()
-    selecao = st.radio("Selecione o Jogador desejado:", jogadores)
+    ranking['Posicao'] = ranking.index
+    ranking['Label'] = ranking['Posicao'].astype(str) + "º - " + ranking['Jogador']
+
+    jogadores_com_posicao = ranking['Label'].tolist()
+    selecao_label = st.radio("Selecione o Jogador desejado:", jogadores_com_posicao)
+    selecao = selecao_label.split(" - ", 1)[1]
 
 with col2:  
     placeholder = st.empty() # limpa área para exibição da imagem
@@ -77,5 +81,8 @@ with col2:
     # 2. pontos do jogador no dataframe ranking
     jogador_pontos = ranking[ranking['Jogador'] == selecao]['Pontos'].values[0]
 
+    # Ranking do jogador
+    jogador_posicao = ranking[ranking['Jogador'] == selecao]['Posicao'].values[0]
+
     # Exibir imagem composta
-    exibir_imagem_jogador(jogador_url_avatar, selecao, jogador_pontos, placeholder)
+    exibir_imagem_jogador(jogador_url_avatar, selecao, jogador_pontos, jogador_posicao, placeholder)
