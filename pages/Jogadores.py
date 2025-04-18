@@ -4,83 +4,78 @@ import service.playerService as playerService
 import service.playerAtividadesService as playerAtividadesService 
 from layout import text_center
 from PIL import Image, ImageDraw, ImageFont
+import requests
+import time
+from io import BytesIO
 
-st.set_page_config(page_title="Jogadores - Comunidade Game", page_icon=":material/support_agent:", layout="centered", initial_sidebar_state="collapsed")
+st.set_page_config(page_title="Jogadores - Comunidade Game", page_icon=":material/support_agent:", layout="wide", initial_sidebar_state="collapsed")
 
-background_path = "./static/background2.jpg" # substitua pelo caminho da sua imagem de background
-avatar_path = "./static/avatar.png" # substitua pelo caminho da sua imagem de avatar com fundo transparente
+def exibir_imagem_jogador(avatar_url, nome_jogador, pontos, placeholder):
+    """Sobrepõe um avatar sobre um background, com barra de progresso enquanto carrega."""
+    
+    # Cria a barra de progresso
+    progress_bar = st.progress(0, text="Carregando avatar do jogador...")
 
-def montar_imagem_jogador(background_path, avatar_path, nome_jogador, pontos, ranking, placeholder):
-    """Sobrepõe um avatar sobre um background."""
-
+    # Etapa 1: Carregar background
+    time.sleep(0.2)
+    background_path = "./static/background2.jpg" 
     background = Image.open(background_path).convert("RGBA")
-    avatar = Image.open(avatar_path).convert("RGBA")
+    progress_bar.progress(20, text="Carregando background...")
 
-    # Redimensionar o avatar, se necessário
-    avatar = avatar.resize((280, 280)) # Ajuste o tamanho conforme necessário
+    # Etapa 2: Baixar imagem
+    response_avatar_url = requests.get(avatar_url)
+    time.sleep(0.2)
+    progress_bar.progress(50, text="Carregando avatar...")
 
-    # Calcula a posição para centralizar o avatar
+    # Etapa 3: Abrir e preparar avatar
+    avatar = Image.open(BytesIO(response_avatar_url.content)).convert("RGBA")
+    avatar = avatar.resize((280, 280))
+    progress_bar.progress(70, text="Processando imagem...")
+
+    # Etapa 4: Montar imagem final
     posicao = ((background.width - avatar.width) // 2,
-                (background.height - avatar.height) // 2)
-    
-    # Sobrepõe o avatar sobre o background
+               (background.height - avatar.height) // 2)
     background.paste(avatar, posicao, avatar)
-    
-    # Adiciona nome do Jogador, ranking e Pontuação
+
     draw = ImageDraw.Draw(background)
-    fonte = fonte = ImageFont.truetype("arial.ttf", 20) 
+    fonte = ImageFont.truetype("arial.ttf", 20)
+    nome_posicao = (background.width // 2, posicao[1] - 15)
+    pontos_posicao = (background.width // 2, posicao[1] + 280 + 15)
+    draw.text(nome_posicao, nome_jogador, font=fonte, fill=(255, 255, 255), anchor="mm")
+    draw.text(pontos_posicao, f"{pontos} pts", font=fonte, fill=(255, 255, 255), anchor="mm")
 
-    nome_posicao = (background.width // 2, posicao[1] - 15) 
-    pontos_posicao = (background.width // 2, posicao[1] + 280 + 15)  
+    progress_bar.progress(100, text="Imagem pronta!")
 
-    draw.text(nome_posicao, nome_jogador, font=fonte, fill=(255, 255, 255), anchor="mm")  # Texto branco e centralizado
-    draw.text(pontos_posicao, f"{ranking}º Lugar - {pontos} pts", font=fonte, fill=(255, 255, 255), anchor="mm")  # Texto branco e centralizado
+    time.sleep(0.2)  # Dá tempo para o usuário ver o 100%
+    progress_bar.empty()  # Limpa a barra
 
-    # Exibe a imagem
-    placeholder.empty() #Limpa o espaço do placeholder
-    #placeholder.image(background, use_container_width=True) 
-    placeholder.write(st.session_state.indice)
-
-def mover(value, placeholder): 
-    indice = int(st.session_state.indice) 
-    indice =  indice + int(value)  
-    # st.session_state.indice = indice
-    placeholder.write(indice)
-    # jogador_nick_name = ranking["Nick Name"][indice]
-    # jogador_pontos = ranking["Total de Pontos"][indice]
-    # montar_imagem_jogador(background_path, avatar_path, jogador_nick_name, jogador_pontos, st.session_state.indice, placeholder)
-
-# =========
-# main
-# =========
-
-# Inicializar dataframe
-if not 'indice' in st.session_state:
-    st.session_state.indice = 1
+    # Exibe imagem final
+    placeholder.empty()
+    placeholder.image(background, use_container_width=True) 
 
 text_center("⭐ Jogadores")
-ranking = playerAtividadesService.get_ranking()
+menu.back_to_main_menu()
 
-tab1, tab2 = st.tabs(['💠 Individual','💠 Todos'])   
+with st.spinner("Carregando Ranking"):
+    # Obtem Ranking de Jogadores - Total de pontuação individual
+    ranking = playerAtividadesService.get_ranking()
 
-with tab1:    
-    next_col, back_col=  st.columns(2)
-    placeholder = st.empty() #Cria placeholder.
+col1, col2 = st.columns(2)
 
-    if next_col.button("Anterior", use_container_width=True):
-        mover(-1, placeholder)
+with col1:
+    jogadores = ranking['Jogador'].tolist()
+    selecao = st.radio("Selecione o Jogador desejado:", jogadores)
 
-    if back_col.button("Próximo", use_container_width=True):
-        mover(1, placeholder)
-
-    try:    
-        # jogador_nick_name = ranking["Nick Name"][st.session_state.indice]
-        # jogador_pontos = ranking["Total de Pontos"][st.session_state.indice]
-        placeholder.write(st.session_state.indice)
-        #montar_imagem_jogador(background_path, avatar_path, jogador_nick_name, jogador_pontos, st.session_state.indice, placeholder)
+with col2:  
+    placeholder = st.empty() # limpa área para exibição da imagem
+    
+    # Obtém os dados completos do jogador a partir do service
+    jogador = playerService.get_doc("nick_name", selecao)
+    jogador_info = jogador[0].to_dict()
+    jogador_url_avatar = jogador_info.get("avatar_url", "")    
         
-    except FileNotFoundError:
-        st.error("Arquivos de imagem não encontrados.")
+    # 2. pontos do jogador no dataframe ranking
+    jogador_pontos = ranking[ranking['Jogador'] == selecao]['Pontos'].values[0]
 
-with tab2:
-    st.dataframe(ranking)
+    # Exibir imagem composta
+    exibir_imagem_jogador(jogador_url_avatar, selecao, jogador_pontos, placeholder)

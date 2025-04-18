@@ -14,7 +14,7 @@ def main_menu():
     if mestres_col.button("🧙 Mestres", use_container_width=True):
         st.switch_page("pages/Mestres.py")
         
-    if poderes_col.button("✨ Poderes", use_container_width=True):
+    if poderes_col.button("✨ Habilidades", use_container_width=True):
         st.switch_page("pages/Poderes.py")    
 
     comunidades_col, parceiros_col = st.columns(2)

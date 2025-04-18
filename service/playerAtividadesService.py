@@ -21,7 +21,7 @@ def get_ranking():
     ranking = sorted(jogadores.items(), key=lambda item: item[1], reverse=True)
 
     # Cria o DataFrame
-    df_ranking = pd.DataFrame(ranking, columns=["Nick Name", "Total de Pontos"])
+    df_ranking = pd.DataFrame(ranking, columns=["Jogador", "Pontos"])
     df_ranking.index = range(1, len(df_ranking) + 1) # Modifica o índice do DataFrame
 
     return df_ranking
