@@ -10,6 +10,7 @@ def get_docs():
         formatted_doc = {                   # <=             
             "Nick": doc_dict["nick_name"],            
             "Comunidade": doc_dict["community"],            
+            "Avatar": doc_dict["avatar_url"],            
         }               
         df = pd.concat([df, pd.DataFrame([formatted_doc])], ignore_index=True)
     return df

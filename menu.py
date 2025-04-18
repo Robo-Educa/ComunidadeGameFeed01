@@ -6,18 +6,21 @@ def main_menu():
     text_center("Comunidade Game")
 
     # Menu
-    jogadores_col, mestres_col, poderes_col = st.columns(3)
+    jogadores_col, poderes_col, raking_col = st.columns(3)
 
     if jogadores_col.button("⭐ Jogadores", use_container_width=True):
         st.switch_page("pages/Jogadores.py")
-
-    if mestres_col.button("🧙 Mestres", use_container_width=True):
-        st.switch_page("pages/Mestres.py")
         
     if poderes_col.button("✨ Habilidades", use_container_width=True):
         st.switch_page("pages/Poderes.py")    
+    
+    if raking_col.button("🏆 Ranking", use_container_width=True):
+        st.switch_page("pages/Ranking.py")    
 
-    comunidades_col, parceiros_col = st.columns(2)
+    mestres_col, comunidades_col, parceiros_col = st.columns(3)
+
+    if mestres_col.button("🧙 Mestres", use_container_width=True):
+        st.switch_page("pages/Mestres.py")
 
     if comunidades_col.button("📍 Comunidades", use_container_width=True):
         st.switch_page("pages/Comunidades.py")

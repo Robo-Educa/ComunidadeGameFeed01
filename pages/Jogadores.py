@@ -1,7 +1,6 @@
 import streamlit as st
 import menu as menu
 import service.playerService as playerService
-import service.playerAtividadesService as playerAtividadesService 
 from layout import text_center
 from PIL import Image, ImageDraw, ImageFont
 import requests
@@ -10,7 +9,7 @@ from io import BytesIO
 
 st.set_page_config(page_title="Jogadores - Comunidade Game", page_icon=":material/support_agent:", layout="wide", initial_sidebar_state="collapsed")
 
-def exibir_imagem_jogador(avatar_url, nome_jogador, pontos, jogador_posicao, placeholder):
+def exibir_imagem_jogador(avatar_url, nome_jogador, placeholder):
     """Sobrepõe um avatar sobre um background, com barra de progresso enquanto carrega."""
     
     # Cria a barra de progresso
@@ -40,9 +39,7 @@ def exibir_imagem_jogador(avatar_url, nome_jogador, pontos, jogador_posicao, pla
     draw = ImageDraw.Draw(background)
     fonte = ImageFont.truetype("arial.ttf", 20)
     nome_posicao = (background.width // 2, posicao[1] - 15)
-    pontos_posicao = (background.width // 2, posicao[1] + 280 + 15)
-    draw.text(nome_posicao, f"{jogador_posicao}º Lugar - {nome_jogador}", font=fonte, fill=(255, 255, 255), anchor="mm")
-    draw.text(pontos_posicao, f"{pontos} pts", font=fonte, fill=(255, 255, 255), anchor="mm")
+    draw.text(nome_posicao, f"{nome_jogador}", font=fonte, fill=(255, 255, 255), anchor="mm")
 
     progress_bar.progress(100, text="Imagem pronta!")
 
@@ -56,33 +53,19 @@ def exibir_imagem_jogador(avatar_url, nome_jogador, pontos, jogador_posicao, pla
 text_center("⭐ Jogadores")
 menu.back_to_main_menu()
 
-with st.spinner("Carregando Ranking"):
-    # Obtem Ranking de Jogadores - Total de pontuação individual
-    ranking = playerAtividadesService.get_ranking()
-
-col1, col2 = st.columns(2)
-
-with col1:
-    ranking['Posicao'] = ranking.index
-    ranking['Label'] = ranking['Posicao'].astype(str) + "º - " + ranking['Jogador']
-
-    jogadores_com_posicao = ranking['Label'].tolist()
-    selecao_label = st.radio("Selecione o Jogador desejado:", jogadores_com_posicao)
-    selecao = selecao_label.split(" - ", 1)[1]
-
-with col2:  
-    placeholder = st.empty() # limpa área para exibição da imagem
+with st.spinner("Carregando Jogadores"):
     
-    # Obtém os dados completos do jogador a partir do service
-    jogador = playerService.get_doc("nick_name", selecao)
-    jogador_info = jogador[0].to_dict()
-    jogador_url_avatar = jogador_info.get("avatar_url", "")    
-        
-    # 2. pontos do jogador no dataframe ranking
-    jogador_pontos = ranking[ranking['Jogador'] == selecao]['Pontos'].values[0]
+    jogadores = playerService.get_docs()    # Obtem listagem de todos os jogadores    
 
-    # Ranking do jogador
-    jogador_posicao = ranking[ranking['Jogador'] == selecao]['Posicao'].values[0]
+    col1, col2 = st.columns(2)
 
-    # Exibir imagem composta
-    exibir_imagem_jogador(jogador_url_avatar, selecao, jogador_pontos, jogador_posicao, placeholder)
+    with col1:
+        if jogadores.empty == False:
+            selecao  = st.radio("Selecione o Jogador desejado:", jogadores["Nick"])
+
+    with col2:
+        if jogadores.empty == False:
+            placeholder = st.empty()
+            jogador_url_avatar = jogadores[jogadores['Nick'] == selecao]['Avatar'].values[0]
+            exibir_imagem_jogador(jogador_url_avatar, selecao, placeholder)
+
